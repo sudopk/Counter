@@ -10,9 +10,10 @@
       android:supportsRtl="true"
       android:theme="@style/Theme.Counter">
     <activity
-        android:name=".MainActivity"
+        android:name=".CounterMainActivity"
         android:exported="true"
         android:label="@string/app_name"
+        android:screenOrientation="portrait"
         android:theme="@style/Theme.Counter.NoActionBar">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
