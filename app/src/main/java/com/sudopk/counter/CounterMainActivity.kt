@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,12 +39,18 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.lifecycleScope
 import com.sudopk.counter.ui.theme.CounterTheme
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import kotlin.math.absoluteValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val TAG = CounterMainActivity::class.simpleName
 
 private const val COUNT_IN_A_ROUND = 108
+
+private val TIME_FORMATTER = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH)
 
 class CounterMainActivity : ComponentActivity() {
   private var mediaPlayer: MediaPlayer? = null
@@ -64,6 +71,9 @@ class CounterMainActivity : ComponentActivity() {
 
               if (count > 0 && count % COUNT_IN_A_ROUND == 0) {
                 vibrator?.vibrateCompat(700)
+              } else {
+                delay(50)
+                vibrator?.vibrateCompat(30)
               }
             }
           }
@@ -92,6 +102,12 @@ class CounterMainActivity : ComponentActivity() {
 @Composable
 fun CounterApp(onCounterChange: (count: Int) -> Unit) {
   val count = rememberSaveable(key = "count") { mutableStateOf(0) }
+  val startTime = rememberSaveable(key = "startTime") {
+    mutableStateOf(Calendar.getInstance())
+  }
+  if (count.value.absoluteValue == 1) {
+    startTime.value = Calendar.getInstance()
+  }
   Scaffold(
     topBar = { TopAppBar({ Text(text = stringResource(R.string.app_name)) }) },
     bottomBar = { CounterBottomBar(count, onCounterChange) },
@@ -108,11 +124,20 @@ fun CounterApp(onCounterChange: (count: Int) -> Unit) {
         val currentRoundCount = count.value % COUNT_IN_A_ROUND
         Text(currentRoundCount.toString(), style = MaterialTheme.typography.h1)
       }
-      Text(
-        "Rounds: ${count.value / COUNT_IN_A_ROUND}", modifier = Modifier
+      Column(
+        modifier = Modifier
           .align(Alignment.TopEnd)
-          .padding(16.dp), style = MaterialTheme.typography.h5
-      )
+          .padding(16.dp),
+        horizontalAlignment = Alignment.End
+      ) {
+        Text("Rounds: ${count.value / COUNT_IN_A_ROUND}", style = MaterialTheme.typography.h5)
+        if (count.value != 0) {
+          Text(
+            "Started at: ${TIME_FORMATTER.format(startTime.value.time)}",
+            style = MaterialTheme.typography.subtitle1
+          )
+        }
+      }
     }
   }
 }
