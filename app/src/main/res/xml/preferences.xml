@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <SwitchPreferenceCompat
+      app:key="short_audio"
+      app:singleLineTitle="false"
+      app:defaultValue="true"
+      app:iconSpaceReserved="false"
+      app:title="Audio feedback on each count" />
+
+  <SwitchPreferenceCompat
+      app:key="short_vibrate"
+      app:singleLineTitle="false"
+      app:iconSpaceReserved="false"
+      app:title="Short haptic feedback on each count" />
+
+  <SwitchPreferenceCompat
+      app:key="long_vibrate"
+      app:singleLineTitle="false"
+      app:defaultValue="true"
+      app:iconSpaceReserved="false"
+      app:title="Long haptic feedback on each round" />
+
+</PreferenceScreen>
