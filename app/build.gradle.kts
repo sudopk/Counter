@@ -3,7 +3,7 @@ plugins {
   id("kotlin-android")
 }
 
-val composeVersion = "1.0.0-beta07"
+val composeVersion = "1.0.0-beta08"
 
 android {
   compileSdk = 30
@@ -51,7 +51,7 @@ dependencies {
   implementation("androidx.compose.material:material:$composeVersion")
   implementation("androidx.compose.ui:ui-tooling:$composeVersion")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
-  implementation("androidx.activity:activity-compose:1.3.0-alpha08")
+  implementation("androidx.activity:activity-compose:1.3.0-beta01")
   implementation("com.github.sudopk:KAndroid:1.1.2")
 
   testImplementation("junit:junit:4.13.2")

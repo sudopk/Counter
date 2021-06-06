@@ -1,5 +1,6 @@
 package com.sudopk.counter
 
+import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -69,7 +71,7 @@ class CounterMainActivity : AppCompatActivity() {
       CounterTheme(window) {
         Surface(color = MaterialTheme.colors.background) {
           val coroutine = rememberCoroutineScope()
-          CounterApp(onShowSettings = {
+          CounterApp(sharedPreferences, onShowSettings = {
             supportFragmentManager.notFoundByTag(SettingsDialogFragment.TAG) { tag ->
               SettingsDialogFragment().show(supportFragmentManager, tag)
             }
@@ -117,7 +119,11 @@ class CounterMainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun CounterApp(onShowSettings: () -> Unit, onCounterChange: (count: Int) -> Unit) {
+fun CounterApp(
+  preferences: SharedPreferences,
+  onShowSettings: () -> Unit,
+  onCounterChange: (count: Int) -> Unit
+) {
   val count = rememberSaveable(key = "count") { mutableStateOf(0) }
   val startTime = rememberSaveable(key = "startTime") {
     mutableStateOf(Calendar.getInstance())
@@ -136,10 +142,18 @@ fun CounterApp(onShowSettings: () -> Unit, onCounterChange: (count: Int) -> Unit
     bottomBar = { CounterBottomBar(count, onCounterChange) },
   ) {
     Box {
+      val lastClickTimeMs = remember { mutableStateOf(System.currentTimeMillis()) }
       TextButton(
         onClick = {
-          count.value++
-          onCounterChange(count.value)
+          val minClickInterval =
+            preferences.getString("min_click_interval_ms", "500")?.toIntOrNull() ?: 500
+          if (System.currentTimeMillis() < lastClickTimeMs.value + minClickInterval) {
+            Log.d(TAG, "Ignoring double click")
+          } else {
+            lastClickTimeMs.value = System.currentTimeMillis()
+            count.value++
+            onCounterChange(count.value)
+          }
         },
         modifier = Modifier.fillMaxSize(),
         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)

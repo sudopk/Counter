@@ -21,4 +21,12 @@
       app:iconSpaceReserved="false"
       app:title="Long haptic feedback on each round" />
 
+  <EditTextPreference
+      app:key="min_click_interval_ms"
+      app:singleLineTitle="false"
+      app:defaultValue="500"
+      app:iconSpaceReserved="false"
+      app:useSimpleSummaryProvider="true"
+      app:title="Min interval between between two clicks (ms)" />
+
 </PreferenceScreen>
