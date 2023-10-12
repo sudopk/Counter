@@ -2,31 +2,32 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <SwitchPreferenceCompat
-      app:key="short_audio"
-      app:singleLineTitle="false"
       app:defaultValue="true"
       app:iconSpaceReserved="false"
+      app:key="short_audio"
+      app:singleLineTitle="false"
       app:title="Audio feedback on each count" />
 
   <SwitchPreferenceCompat
+      app:defaultValue="true"
+      app:iconSpaceReserved="false"
       app:key="short_vibrate"
       app:singleLineTitle="false"
-      app:iconSpaceReserved="false"
       app:title="Short haptic feedback on each count" />
 
   <SwitchPreferenceCompat
-      app:key="long_vibrate"
-      app:singleLineTitle="false"
       app:defaultValue="true"
       app:iconSpaceReserved="false"
+      app:key="long_vibrate"
+      app:singleLineTitle="false"
       app:title="Long haptic feedback on each round" />
 
   <EditTextPreference
-      app:key="min_click_interval_ms"
-      app:singleLineTitle="false"
       app:defaultValue="500"
       app:iconSpaceReserved="false"
-      app:useSimpleSummaryProvider="true"
-      app:title="Min interval between between two clicks (ms)" />
+      app:key="min_click_interval_ms"
+      app:singleLineTitle="false"
+      app:title="Min interval between between two clicks (ms)"
+      app:useSimpleSummaryProvider="true" />
 
 </PreferenceScreen>
