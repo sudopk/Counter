@@ -23,7 +23,7 @@
       app:title="Long haptic feedback on each round" />
 
   <EditTextPreference
-      app:defaultValue="500"
+      app:defaultValue="@integer/min_click_interval_ms"
       app:iconSpaceReserved="false"
       app:key="min_click_interval_ms"
       app:singleLineTitle="false"

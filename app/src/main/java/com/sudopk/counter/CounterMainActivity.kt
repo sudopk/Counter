@@ -4,8 +4,6 @@ import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,7 +49,7 @@ import com.sudopk.kandroid.notFoundByTag
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.absoluteValue
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -62,11 +62,13 @@ private val TIME_FORMATTER = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGL
 
 class CounterMainActivity : AppCompatActivity() {
   private var mediaPlayer: MediaPlayer? = null
-  private var vibrator: Vibrator? = null
+  private var vibrator: MyVibrator = NoVibrator
+  private lateinit var sharedPreferences: SharedPreferences
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(/*context=*/this)
+    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(/*context=*/this)
+
     setContent {
       CounterTheme(window) {
         Surface(color = MaterialTheme.colors.background) {
@@ -75,27 +77,30 @@ class CounterMainActivity : AppCompatActivity() {
             supportFragmentManager.notFoundByTag(SettingsDialogFragment.TAG) { tag ->
               SettingsDialogFragment().show(supportFragmentManager, tag)
             }
-          }) { count ->
-            coroutine.launch {
-              if (sharedPreferences.getBoolean("short_audio", false)) {
-                while (mediaPlayer?.isPlaying == true) {
-                  delay(50)
-                }
-                mediaPlayer?.start() ?: Log.d(TAG, "MediaPlayer not ready")
-              }
-
-              if (count > 0 && count % COUNT_IN_A_ROUND == 0) {
-                if (sharedPreferences.getBoolean("long_vibrate", false)) {
-                  vibrator?.vibrateCompat(700)
-                }
-              } else {
-                if (sharedPreferences.getBoolean("short_vibrate", false)) {
-                  delay(50)
-                  vibrator?.vibrateCompat(30)
-                }
-              }
-            }
+          }) {
+            coroutine.onNewCount(it)
           }
+        }
+      }
+    }
+  }
+
+  private fun CoroutineScope.onNewCount(count: Int) {
+    this.launch {
+      if (sharedPreferences.getBoolean("short_audio", false)) {
+        while (mediaPlayer?.isPlaying == true) {
+          delay(50)
+        }
+        mediaPlayer?.start() ?: Log.d(TAG, "MediaPlayer not ready")
+      }
+
+      if (count > 0 && count % COUNT_IN_A_ROUND == 0) {
+        if (sharedPreferences.getBoolean("long_vibrate", false)) {
+          vibrator.vibrate(1000)
+        }
+      } else {
+        if (sharedPreferences.getBoolean("short_vibrate", false)) {
+          vibrator.vibrate(30)
         }
       }
     }
@@ -104,8 +109,13 @@ class CounterMainActivity : AppCompatActivity() {
   override fun onResume() {
     super.onResume()
     lifecycleScope.launch {
-      vibrator = getSystemService()
       mediaPlayer = MediaPlayer.create(applicationContext, R.raw.button_click)
+
+      vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        SOnwardsVibrator(getSystemService()!!)
+      } else {
+        PreSVibrator(getSystemService()!!)
+      }
     }
   }
 
@@ -114,6 +124,8 @@ class CounterMainActivity : AppCompatActivity() {
     lifecycleScope.launch {
       mediaPlayer?.release()
       mediaPlayer = null
+
+      vibrator = NoVibrator
     }
   }
 }
@@ -122,13 +134,13 @@ class CounterMainActivity : AppCompatActivity() {
 fun CounterApp(
   preferences: SharedPreferences,
   onShowSettings: () -> Unit,
-  onCounterChange: (count: Int) -> Unit
+  onCounterChange: (count: Int) -> Unit,
 ) {
-  val count = rememberSaveable(key = "count") { mutableStateOf(0) }
+  val count = rememberSaveable(key = "count") { mutableIntStateOf(0) }
   val startTime = rememberSaveable(key = "startTime") {
     mutableStateOf(Calendar.getInstance())
   }
-  if (count.value.absoluteValue == 1) {
+  if (count.intValue == 1) {
     startTime.value = Calendar.getInstance()
   }
   Scaffold(
@@ -140,25 +152,26 @@ fun CounterApp(
       })
     },
     bottomBar = { CounterBottomBar(count, onCounterChange) },
-  ) {
-    Box {
-      val lastClickTimeMs = remember { mutableStateOf(System.currentTimeMillis()) }
+  ) { padding ->
+    Box(Modifier.padding(padding)) {
+      val lastClickTimeMs = remember { mutableLongStateOf(System.currentTimeMillis()) }
       TextButton(
         onClick = {
           val minClickInterval =
-            preferences.getString("min_click_interval_ms", "500")?.toIntOrNull() ?: 500
-          if (System.currentTimeMillis() < lastClickTimeMs.value + minClickInterval) {
+            preferences.getString("min_click_interval_ms", null)?.toIntOrNull()
+              ?: R.integer.min_click_interval_ms
+          if (System.currentTimeMillis() < lastClickTimeMs.longValue + minClickInterval) {
             Log.d(TAG, "Ignoring double click")
           } else {
-            lastClickTimeMs.value = System.currentTimeMillis()
-            count.value++
-            onCounterChange(count.value)
+            lastClickTimeMs.longValue = System.currentTimeMillis()
+            count.intValue++
+            onCounterChange(count.intValue)
           }
         },
         modifier = Modifier.fillMaxSize(),
         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
       ) {
-        val currentRoundCount = count.value % COUNT_IN_A_ROUND
+        val currentRoundCount = count.intValue % COUNT_IN_A_ROUND
         Text(currentRoundCount.toString(), style = MaterialTheme.typography.h1)
       }
       Column(
@@ -167,8 +180,8 @@ fun CounterApp(
           .padding(16.dp),
         horizontalAlignment = Alignment.End
       ) {
-        Text("Rounds: ${count.value / COUNT_IN_A_ROUND}", style = MaterialTheme.typography.h5)
-        if (count.value != 0) {
+        Text("Rounds: ${count.intValue / COUNT_IN_A_ROUND}", style = MaterialTheme.typography.h5)
+        if (count.intValue != 0) {
           Text(
             "Started at: ${TIME_FORMATTER.format(startTime.value.time)}",
             style = MaterialTheme.typography.subtitle1
@@ -210,14 +223,5 @@ private fun CounterBottomBar(count: MutableState<Int>, onCounterChange: (count: 
         Text(contentDescription)
       }
     }
-  }
-}
-
-fun Vibrator.vibrateCompat(milliSeconds: Long) {
-  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    vibrate(VibrationEffect.createOneShot(milliSeconds, VibrationEffect.DEFAULT_AMPLITUDE))
-  } else {
-    @Suppress("DEPRECATION")
-    vibrate(milliSeconds)
   }
 }
