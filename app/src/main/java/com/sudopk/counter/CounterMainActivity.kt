@@ -38,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -108,14 +110,14 @@ class CounterMainActivity : AppCompatActivity() {
 
   override fun onResume() {
     super.onResume()
-    lifecycleScope.launch {
-      mediaPlayer = MediaPlayer.create(applicationContext, R.raw.button_click)
 
+    lifecycleScope.launch(Dispatchers.Default) {
       vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         SOnwardsVibrator(getSystemService()!!)
       } else {
         PreSVibrator(getSystemService()!!)
       }
+      mediaPlayer = MediaPlayer.create(applicationContext, R.raw.button_click)
     }
   }
 
@@ -155,11 +157,12 @@ fun CounterApp(
   ) { padding ->
     Box(Modifier.padding(padding)) {
       val lastClickTimeMs = remember { mutableLongStateOf(System.currentTimeMillis()) }
+      val defaultMinClickInterval = integerResource(R.integer.min_click_interval_ms)
       TextButton(
         onClick = {
           val minClickInterval =
             preferences.getString("min_click_interval_ms", null)?.toIntOrNull()
-              ?: R.integer.min_click_interval_ms
+              ?: defaultMinClickInterval
           if (System.currentTimeMillis() < lastClickTimeMs.longValue + minClickInterval) {
             Log.d(TAG, "Ignoring double click")
           } else {
