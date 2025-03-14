@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <integer name="min_click_interval_ms">150</integer>
+  <bool name="short_audio_default">true</bool>
+  <bool name="short_vibrate_default">true</bool>
+  <bool name="long_vibrate_default">true</bool>
 </resources>

@@ -5,14 +5,14 @@ plugins {
 }
 
 android {
-  compileSdk = 34
+  compileSdk = 35
   namespace = "com.sudopk.counter"
 
   defaultConfig {
     minSdk = 24
     targetSdk = compileSdk
-    versionCode = 3
-    versionName = "1.2"
+    versionCode = 4
+    versionName = "1.3"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables {
@@ -27,16 +27,17 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    // https://developer.android.com/build/jdks#source-compat
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
   kotlinOptions {
-    jvmTarget = "1.8"
+    jvmTarget = "21"
   }
   buildFeatures {
     compose = true
   }
-  buildToolsVersion = "34.0.0"
+  buildToolsVersion = "35.0.0"
 }
 
 dependencies {
@@ -50,6 +51,7 @@ dependencies {
   implementation(libs.lifecycle.runtime.ktx)
   implementation(libs.activity.compose)
   implementation(libs.kandroid)
+  implementation(libs.androidx.material.icons.extended)
 
   val composeBom = platform(libs.androidx.compose.bom)
   implementation(composeBom)

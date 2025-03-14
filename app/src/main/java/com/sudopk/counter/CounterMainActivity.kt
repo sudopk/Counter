@@ -38,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.booleanResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -75,21 +76,32 @@ class CounterMainActivity : AppCompatActivity() {
       CounterTheme(window) {
         Surface(color = MaterialTheme.colors.background) {
           val coroutine = rememberCoroutineScope()
+
+          val settingsDefaultValues = SettingsDefaultValues(
+            booleanResource(R.bool.short_audio_default),
+            booleanResource(R.bool.short_vibrate_default),
+            booleanResource(R.bool.long_vibrate_default),
+          )
+
           CounterApp(sharedPreferences, onShowSettings = {
             supportFragmentManager.notFoundByTag(SettingsDialogFragment.TAG) { tag ->
               SettingsDialogFragment().show(supportFragmentManager, tag)
             }
           }) {
-            coroutine.onNewCount(it)
+            coroutine.onNewCount(it, settingsDefaultValues)
           }
         }
       }
     }
   }
 
-  private fun CoroutineScope.onNewCount(count: Int) {
+  private fun CoroutineScope.onNewCount(count: Int, settingsDefaultValues: SettingsDefaultValues) {
     this.launch {
-      if (sharedPreferences.getBoolean("short_audio", false)) {
+      if (sharedPreferences.getBoolean(
+          "short_audio",
+          settingsDefaultValues.shortAudioDefault
+        )
+      ) {
         while (mediaPlayer?.isPlaying == true) {
           delay(50)
         }
@@ -97,11 +109,19 @@ class CounterMainActivity : AppCompatActivity() {
       }
 
       if (count > 0 && count % COUNT_IN_A_ROUND == 0) {
-        if (sharedPreferences.getBoolean("long_vibrate", false)) {
-          vibrator.vibrate(1000)
+        if (sharedPreferences.getBoolean(
+            "long_vibrate",
+            settingsDefaultValues.shortVibrateDefault
+          )
+        ) {
+          vibrator.vibrate(2000)
         }
       } else {
-        if (sharedPreferences.getBoolean("short_vibrate", false)) {
+        if (sharedPreferences.getBoolean(
+            "short_vibrate",
+            settingsDefaultValues.longVibrateDefault
+          )
+        ) {
           vibrator.vibrate(30)
         }
       }
@@ -160,6 +180,7 @@ fun CounterApp(
       val defaultMinClickInterval = integerResource(R.integer.min_click_interval_ms)
       TextButton(
         onClick = {
+          // getInt can't be used because EditTextPreference returns String.
           val minClickInterval =
             preferences.getString("min_click_interval_ms", null)?.toIntOrNull()
               ?: defaultMinClickInterval
@@ -228,3 +249,9 @@ private fun CounterBottomBar(count: MutableState<Int>, onCounterChange: (count: 
     }
   }
 }
+
+private data class SettingsDefaultValues(
+  val shortAudioDefault: Boolean,
+  val shortVibrateDefault: Boolean,
+  val longVibrateDefault: Boolean,
+)

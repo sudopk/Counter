@@ -2,21 +2,21 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
   <SwitchPreferenceCompat
-      app:defaultValue="true"
+      app:defaultValue="@bool/short_audio_default"
       app:iconSpaceReserved="false"
       app:key="short_audio"
       app:singleLineTitle="false"
       app:title="Audio feedback on each count" />
 
   <SwitchPreferenceCompat
-      app:defaultValue="true"
+      app:defaultValue="@bool/short_vibrate_default"
       app:iconSpaceReserved="false"
       app:key="short_vibrate"
       app:singleLineTitle="false"
       app:title="Short haptic feedback on each count" />
 
   <SwitchPreferenceCompat
-      app:defaultValue="true"
+      app:defaultValue="@bool/long_vibrate_default"
       app:iconSpaceReserved="false"
       app:key="long_vibrate"
       app:singleLineTitle="false"
