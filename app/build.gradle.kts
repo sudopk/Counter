@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.kotlinAndroid)
@@ -5,14 +7,14 @@ plugins {
 }
 
 android {
-  compileSdk = 35
+  compileSdkVersion("android-36")
   namespace = "com.sudopk.counter"
 
   defaultConfig {
     minSdk = 24
     targetSdk = compileSdk
-    versionCode = 4
-    versionName = "1.3"
+    versionCode = 5
+    versionName = "1.4"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables {
@@ -31,13 +33,16 @@ android {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
   }
-  kotlinOptions {
-    jvmTarget = "21"
+  kotlin {
+    compilerOptions {
+      jvmTarget = JvmTarget.JVM_21
+    }
   }
+
   buildFeatures {
     compose = true
   }
-  buildToolsVersion = "35.0.0"
+  buildToolsVersion = "36.1.0"
 }
 
 dependencies {

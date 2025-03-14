@@ -2,47 +2,35 @@ package com.sudopk.counter.ui.theme
 
 import android.view.Window
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
-private val AmberDarkColorPalette = darkColors(
-  primary = Amber200,
-  primaryVariant = Amber700,
-  secondary = AmberSecondary200
-)
+private val DarkColorPalette = darkColorScheme()
 
-private val AmberLightColorPalette = lightColors(
-  primary = Amber500,
-  primaryVariant = Amber700,
-  secondary = AmberSecondary200
-)
-
+private val LightColorPalette = lightColorScheme()
 
 @Composable
 fun CounterTheme(
-  window: Window,
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  content: @Composable() () -> Unit
+    window: Window, darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit
 ) {
-  val colors = if (darkTheme) {
-    AmberDarkColorPalette
-  } else {
-    AmberLightColorPalette
-  }
+    val colorScheme = if (darkTheme) DarkColorPalette else LightColorPalette
 
-  MaterialTheme(
-    colors = colors,
-    typography = Typography,
-    shapes = Shapes,
-  ) {
-    window.setStatusBarColorBySdkVersion(MaterialTheme.colors.statusBar.toArgb())
-    content()
-  }
+    MaterialTheme(colorScheme = colorScheme) {
+        // See https://stackoverflow.com/questions/76731368/how-to-remove-status-bar-in-jetpack-compose
+        val view = LocalView.current
+        if (!view.isInEditMode) {
+            SideEffect {
+                WindowCompat.getInsetsController(
+                    window, view
+                ).isAppearanceLightStatusBars = !darkTheme
+            }
+        }
+
+        content()
+    }
 }
-
-val Colors.statusBar: Color get() = if (isLight) primaryVariant else surface

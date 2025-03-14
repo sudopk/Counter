@@ -1,22 +1,22 @@
 [versions]
-agp = "8.9.0"
-composeVersion = "1.7.8"
+agp = "8.13.0"
+composeVersion = "1.9.2"
 kandroid = "1.1.2"
-kotlin = "2.0.0"
-core-ktx = "1.15.0"
+kotlin = "2.2.20"
+core-ktx = "1.17.0"
 junit = "4.13.2"
-androidx-test-ext-junit = "1.2.1"
-espresso-core = "3.6.1"
-lifecycle-runtime-ktx = "2.8.7"
-activity-compose = "1.10.1"
-compose-bom = "2025.03.00"
-material = "1.12.0"
+androidx-test-ext-junit = "1.3.0"
+espresso-core = "3.7.0"
+lifecycle-runtime-ktx = "2.9.4"
+activity-compose = "1.11.0"
+compose-bom = "2025.09.01"
+material = "1.13.0"
 preference-ktx = "1.2.1"
-appcompat = "1.7.0"
+appcompat = "1.7.1"
 
 [libraries]
-androidx-material = { module = "androidx.compose.material:material", version.ref = "composeVersion" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "composeVersion" }
+androidx-material = { module = "androidx.compose.material3:material3", version = "1.4.0" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version = "1.7.8" }
 androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "composeVersion" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "composeVersion" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "composeVersion" }
