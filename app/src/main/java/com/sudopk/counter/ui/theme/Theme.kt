@@ -40,7 +40,7 @@ fun CounterTheme(
     typography = Typography,
     shapes = Shapes,
   ) {
-    window.statusBarColor = MaterialTheme.colors.statusBar.toArgb()
+    window.setStatusBarColorBySdkVersion(MaterialTheme.colors.statusBar.toArgb())
     content()
   }
 }
